@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ghibli Photo Booth ✨</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Patrick Hand', cursive;
+            /* Softer, more painterly background gradient */
+            background: linear-gradient(180deg, #B0E0E6 0%, #9ACD32 50%, #7CB342 100%);
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated background elements */
+        .background-scene {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .mountain {
+            position: absolute;
+            bottom: 0;
+            width: 0;
+            height: 0;
+            border-left: 200px solid transparent;
+            border-right: 200px solid transparent;
+            /* Muted mountain colors */
+            border-bottom: 300px solid #556B2F; /* Deep Forest Green */
+            opacity: 0.5;
+            filter: blur(0.5px);
+        }
+
+        .mountain-1 {
+            left: -100px;
+            border-left-width: 250px;
+            border-right-width: 250px;
+            border-bottom-width: 350px;
+        }
+
+        .mountain-2 {
+            right: -50px;
+            border-left-width: 180px;
+            border-right-width: 180px;
+            border-bottom-width: 280px;
+        }
+
+        .mountain-3 {
+            left: 30%;
+            border-left-width: 150px;
+            border-right-width: 150px;
+            border-bottom-width: 250px;
+            border-bottom-color: #6B8E23; /* Olive Green */
+        }
+
+        .grass-field {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 200px;
+            /* Subtle grass texture */
+            background: linear-gradient(180deg, transparent 0%, #6B8E23 100%);
+            opacity: 0.7;
+        }
+
+        .cloud {
+            position: absolute;
+            /* More defined, soft white clouds */
+            background: #F0F8FF;
+            border-radius: 100px;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            animation: float-cloud 40s infinite linear;
+        }
+
+        .cloud::before, .cloud::after {
+            content: '';
+            position: absolute;
+            background: #F0F8FF;
+            border-radius: 100px;
+        }
+
+        .cloud-1 {
+            width: 120px;
+            height: 50px;
+            top: 8%;
+            left: -150px;
+        }
+        
+        .cloud-1::before {
+            width: 70px;
+            height: 50px;
+            top: -25px;
+            left: 20px;
+        }
+        
+        .cloud-1::after {
+            width: 80px;
+            height: 40px;
+            top: -20px;
+            right: 20px;
+        }
+
+        .cloud-2 {
+            width: 140px;
+            height: 60px;
+            top: 25%;
+            left: -180px;
+            animation-delay: -20s;
+        }
+        
+        .cloud-2::before {
+            width: 80px;
+            height: 60px;
+            top: -30px;
+            left: 25px;
+        }
+        
+        .cloud-2::after {
+            width: 90px;
+            height: 50px;
+            top: -25px;
+            right: 25px;
+        }
+
+        .cloud-3 {
+            width: 100px;
+            height: 45px;
+            top: 50%;
+            left: -120px;
+            animation-delay: -30s;
+        }
+        
+        .cloud-3::before {
+            width: 60px;
+            height: 45px;
+            top: -20px;
+            left: 15px;
+        }
+        
+        .cloud-3::after {
+            width: 70px;
+            height: 40px;
+            top: -18px;
+            right: 15px;
+        }
+
+        @keyframes float-cloud {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(calc(100vw + 200px)); }
+        }
+
+        .birds {
+            position: absolute;
+            top: 15%;
+            right: 10%;
+            font-size: 20px;
+            animation: fly 8s ease-in-out infinite;
+        }
+
+        @keyframes fly {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(100px, -30px); }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 25px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .main-panel, .side-panel {
+            /* Worn Paper/Wood Panel look */
+            background: #FDF5E6; /* Old Lace - Muted Beige */
+            /* Subtle diagonal line texture overlay */
+            background-image: linear-gradient(45deg, #FFFAF0 25%, transparent 25%), 
+                              linear-gradient(-45deg, #FFFAF0 25%, transparent 25%), 
+                              linear-gradient(45deg, transparent 75%, #FFFAF0 75%), 
+                              linear-gradient(-45deg, transparent 75%, #FFFAF0 75%);
+            background-size: 10px 10px;
+            background-color: #FDF5E6;
+            
+            backdrop-filter: none; /* Removed blur for a more 'paper' feel */
+            border-radius: 15px; /* Softer corners */
+            padding: 35px;
+            /* Thicker, rustic wooden frame shadow */
+            box-shadow: 
+                0 15px 50px rgba(0, 0, 0, 0.3), /* Main Shadow */
+                inset 0 0 0 10px #8B7355, /* Inner Wood Border */
+                inset 0 0 0 12px #FDF5E6; /* Inner Paper Margin */
+            
+            border: 2px solid #6B8E23; /* Outer Green Outline */
+            position: relative;
+            overflow: hidden;
+        }
+
+        .main-panel::before {
+            content: '🌿';
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            font-size: 30px;
+            animation: sway 3s ease-in-out infinite;
+        }
+
+        .main-panel::after {
+            content: '🦋';
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 30px;
+            animation: flutter 4s ease-in-out infinite;
+        }
+
+        @keyframes sway {
+            0%, 100% { transform: rotate(-5deg); }
+            50% { transform: rotate(5deg); }
+        }
+
+        @keyframes flutter {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .side-panel {
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        h1 {
+            color: #2E7D32;
+            margin-bottom: 30px; /* Increased margin */
+            font-size: 52px; /* Slightly larger title */
+            text-align: center;
+            /* Deeper shadow for a more pronounced, painted look */
+            text-shadow: 4px 4px 0px rgba(255, 228, 181, 0.9), 6px 6px 0px rgba(70, 130, 180, 0.3);
+            letter-spacing: 3px;
+        }
+
+        h2 {
+            color: #558B2F;
+            margin-bottom: 20px;
+            font-size: 28px; /* Larger section titles */
+            text-shadow: 2px 2px 0px rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            /* Added a subtle green border/line under the title */
+            padding-bottom: 5px;
+            border-bottom: 3px dashed #A2CD5A;
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            /* Darker, rustic frame */
+            background: #4A5D3D; 
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 25px;
+            /* Stronger wood frame effect */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), inset 0 0 0 8px #8B7355;
+            border: 4px solid #364536;
+        }
+
+        #video {
+            width: 100%;
+            display: block;
+        }
+
+        #overlayCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        #canvas, #collageCanvas {
+            display: none;
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        /* Group for start/stop buttons on mobile */
+        .controls-top {
+            display: flex;
+            gap: 12px;
+            flex: 1 1 100%; /* Take full width on mobile */
+        }
+
+        .controls-top button {
+            flex: 1; /* Share space evenly */
+        }
+        
+        /* Capture button on its own row on mobile */
+        #captureBtn {
+            flex: 1 1 100%; /* Take full width */
+        }
+
+        button {
+            flex: 1;
+            min-width: 130px;
+            padding: 18px 28px; /* Slightly larger click area */
+            border: 6px solid #558B2F; /* Thicker, rustic border */
+            border-radius: 15px; /* Less rounded corners for a wooden block feel */
+            font-size: 20px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            /* Muted moss green/beige base */
+            background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
+            color: #2E7D32;
+            /* Deeper shadow for 3D/tactile feel */
+            box-shadow: 0 8px 0 #558B2F, inset 0 1px 0 rgba(255, 255, 255, 0.7);
+            font-family: 'Patrick Hand', cursive;
+            text-transform: lowercase;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 0 #558B2F, inset 0 1px 0 rgba(255, 255, 255, 0.7);
+            background: linear-gradient(135deg, #FFDAB9 0%, #FFE4B5 100%);
+        }
+
+        button:active {
+            /* Push the button down */
+            transform: translateY(6px);
+            box-shadow: 0 2px 0 #558B2F; 
+        }
+
+        button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 4px 0 #558B2F;
+        }
+
+        .countdown {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            /* Magic Glow Countdown */
+            font-size: 160px;
+            color: #F0F8FF; /* Off-white, glowing text */
+            text-shadow: 
+                0 0 10px #B0E0E6,
+                0 0 40px #4A90E2,
+                0 0 80px rgba(74, 144, 226, 0.8),
+                6px 6px 0px #364536;
+            font-weight: bold;
+            z-index: 10;
+            animation: pulse-ghibli 1s ease-in-out;
+        }
+
+        @keyframes pulse-ghibli {
+            0%, 100% { transform: translate(-50%, -50%) scale(0.8) rotate(-5deg); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.3) rotate(5deg); opacity: 1; }
+        }
+
+        .collage-mode-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .collage-btn {
+            padding: 20px 12px;
+            font-size: 16px;
+            /* Muted green/beige theme */
+            background: linear-gradient(135deg, #D4E1C9 0%, #B0C4A4 100%);
+            border: 4px solid #6B8E23;
+            color: #364536;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            min-width: auto;
+            box-shadow: 0 5px 0 #6B8E23, inset 0 1px 0 rgba(255, 255, 255, 0.5);
+        }
+
+        .collage-btn .emoji {
+            font-size: 32px;
+        }
+
+        .collage-btn.active {
+            background: linear-gradient(135deg, #6B8E23 0%, #556B2F 100%);
+            color: #FFFAF0; /* Light text */
+            border-color: #364536;
+            transform: scale(1.0);
+            box-shadow: 0 5px 0 #364536;
+        }
+
+        .filters {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+            margin-bottom: 25px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        label {
+            color: #2E7D32;
+            font-size: 16px;
+            font-weight: 700;
+            text-shadow: 1px 1px 0px rgba(255, 228, 181, 0.6);
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 10px;
+            border-radius: 10px;
+            /* Muted Green track */
+            background: #B0C4A4;
+            border: 1px solid #6B8E23;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #FFDAB9; /* Peach-colored thumb */
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
+            border: 4px solid #8B7355; /* Wood border */
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #FFDAB9;
+            cursor: pointer;
+            border: 4px solid #8B7355;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
+        }
+
+        .preset-filters {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .preset-btn {
+            padding: 14px 20px;
+            font-size: 16px;
+            /* Muted Purples/Blues */
+            background: linear-gradient(135deg, #EBE0FF 0%, #D8C7FF 100%);
+            border: 3px solid #7B68EE;
+            color: #483D8B;
+            box-shadow: 0 5px 0 #7B68EE;
+        }
+
+        .preset-btn.active {
+            background: linear-gradient(135deg, #7B68EE 0%, #6A5ACD 100%);
+            color: white;
+            border-color: #483D8B;
+            box-shadow: 0 5px 0 #483D8B;
+        }
+
+        .gallery {
+            display: grid;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .gallery-item {
+            position: relative;
+            border-radius: 5px;
+            overflow: hidden;
+            /* Look like photos pinned to a board */
+            background: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border: 8px solid white; /* Thick white photo border */
+            transition: transform 0.3s;
+            transform: rotate(var(--rotation, 0deg)); /* Default rotation property */
+        }
+        
+        /* Add random slight rotation to gallery items for a handcrafted look */
+        .gallery-item:nth-child(even) { --rotation: -1deg; }
+        .gallery-item:nth-child(odd) { --rotation: 2deg; }
+
+        .gallery-item:hover {
+            transform: scale(1.05) rotate(0deg);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            display: block;
+        }
+
+        .gallery-item .actions {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(74, 93, 61, 0.95), transparent); /* Darker, deep green actions bar */
+            padding: 18px 12px 12px;
+            display: flex;
+            gap: 10px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .gallery-item:hover .actions {
+            opacity: 1;
+        }
+
+        .gallery-item button {
+            flex: 1;
+            padding: 10px 14px;
+            font-size: 16px;
+            min-width: auto;
+            background: #FDF5E6;
+            color: #4A5D3D;
+            border: 2px solid #8B7355;
+            box-shadow: none;
+        }
+
+        .status {
+            text-align: center;
+            color: #4A5D3D; /* Darker text */
+            padding: 20px;
+            background: linear-gradient(135deg, #FFFAF0 0%, #FFF5EE 100%);
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 20px;
+            border: 4px solid #8B7355; /* Wood frame */
+            font-weight: 700;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: rgba(107, 142, 35, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+            border: 2px solid #6B8E23;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #66BB6A, #FFA726);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+
+        /* --- MOBILE RESPONSIVENESS FIXES & ENHANCEMENTS --- */
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 30px;
+                margin-top: 25px;
+                margin-bottom: 15px;
+                /* H1 ALIGNMENT FIX: Ensure text is centered and shadow is simplified */
+                text-align: center; 
+                text-shadow: 2px 2px 0px rgba(255, 228, 181, 0.9), 3px 3px 0px rgba(70, 130, 180, 0.3);
+            }
+
+            h2 {
+                font-size: 20px;
+                padding-bottom: 5px;
+            }
+
+            .main-panel, .side-panel {
+                padding: 20px;
+                border-radius: 20px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), inset 0 0 0 5px #8B7355;
+            }
+
+            .video-container {
+                border-radius: 20px;
+                margin-bottom: 20px;
+            }
+
+            /* CONTROL BUTTONS FIX: Start/Stop side-by-side, Capture full width */
+            .controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .controls-top {
+                display: flex;
+                gap: 10px;
+            }
+
+            .controls-top button {
+                flex: 1;
+                min-width: unset;
+            }
+
+            #captureBtn {
+                width: 100%;
+                flex: none; /* Override flex: 1 from generic button style */
+            }
+
+            button {
+                padding: 14px 20px;
+                font-size: 16px;
+            }
+
+            /* COLLAGE AND PRESET FIX: 2x3 grid layout (2 columns) */
+            .collage-mode-selector {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .collage-btn {
+                padding: 15px 8px;
+            }
+            
+            .collage-btn .emoji {
+                font-size: 24px;
+            }
+
+            .preset-filters {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .filters {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .gallery {
+                margin-top: 15px;
+                gap: 10px;
+            }
+
+            .gallery-item:hover {
+                transform: scale(1.02);
+            }
+
+            .gallery-item .actions {
+                opacity: 1;
+                padding: 10px;
+            }
+
+            .gallery-item button {
+                padding: 8px 10px;
+                font-size: 12px;
+            }
+
+            .countdown {
+                font-size: 80px;
+            }
+
+            .mountain-1 { left: -150px; }
+            .mountain-2 { right: -100px; }
+        }
+
+        @media (max-width: 480px) {
+            /* Keep 2 columns even on very small screens for requested 2x3 feel */
+            .collage-mode-selector, .preset-filters {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .cute-stickers {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(200, 230, 201, 0.5);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #66BB6A;
+            border-radius: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4CAF50;
+        }
+
+        .sparkle {
+            position: fixed;
+            font-size: 24px;
+            animation: sparkle-fall 3s ease-out;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        @keyframes sparkle-fall {
+            0% { 
+                opacity: 1; 
+                transform: translateY(0) scale(0) rotate(0deg); 
+            }
+            50% { 
+                opacity: 1; 
+                transform: translateY(-50px) scale(1.5) rotate(180deg); 
+            }
+            100% { 
+                opacity: 0; 
+                transform: translateY(100px) scale(0.5) rotate(360deg); 
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-scene">
+        <div class="mountain mountain-1"></div>
+        <div class="mountain mountain-2"></div>
+        <div class="mountain mountain-3"></div>
+        <div class="grass-field"></div>
+        <div class="birds">🦅 🦅</div>
+    </div>
+
+    <div class="cloud cloud-1"></div>
+    <div class="cloud cloud-2"></div>
+    <div class="cloud cloud-3"></div>
+
+    <div class="container">
+        <div class="main-panel">
+            <h1>🌾 totoro's photo booth 🌳</h1>
+            
+            <div class="status" id="status">welcome to the magical forest! choose your adventure ✨</div>
+            
+            <div class="video-container" id="videoContainer">
+                <video id="video" autoplay playsinline></video>
+                <canvas id="overlayCanvas"></canvas>
+                <canvas id="canvas"></canvas>
+                <canvas id="collageCanvas"></canvas>
+            </div>
+            
+            <div class="controls">
+                <div class="controls-top">
+                    <button id="startBtn">🎬 start camera</button>
+                    <button id="stopBtn" disabled>⏹️ stop camera</button>
+                </div>
+                <button id="captureBtn" disabled>📸 start session!</button>
+            </div>
+
+            <!-- ENHANCEMENT: Ghibli Coded Title -->
+            <h2>🌱 totoro's adventures</h2>
+            <div class="collage-mode-selector">
+                <button class="collage-btn active" data-mode="single">
+                    <span class="emoji">📷</span>
+                    <span class="label">single</span>
+                </button>
+                <button class="collage-btn" data-mode="2-strip">
+                    <span class="emoji">📸</span>
+                    <span class="label">2 strip</span>
+                </button>
+                <button class="collage-btn" data-mode="3-strip">
+                    <span class="emoji">🎞️</span>
+                    <span class="label">3 strip</span>
+                </button>
+                <button class="collage-btn" data-mode="4-strip">
+                    <span class="emoji">🎬</span>
+                    <span class="label">4 strip</span>
+                </button>
+                <button class="collage-btn" data-mode="2x2">
+                    <span class="emoji">⬜</span>
+                    <span class="label">2x2 grid</span>
+                </button>
+                <button class="collage-btn" data-mode="2x3">
+                    <span class="emoji">▦</span>
+                    <span class="label">2x3 grid</span>
+                </button>
+            </div>
+
+            <!-- SECTION REMOVED: 🐺 mononoke's masks -->
+            
+            <!-- ENHANCEMENT: Ghibli Coded Title -->
+            <h2>🌊 sen's moods</h2>
+            <div class="preset-filters">
+                <button class="preset-btn active" data-filter="none">natural</button>
+                <button class="preset-btn" data-filter="grayscale">monochrome</button>
+                <button class="preset-btn" data-filter="sepia">nostalgic</button>
+                <button class="preset-btn" data-filter="vintage">vintage</button>
+                <button class="preset-btn" data-filter="cool">ocean breeze</button>
+                <button class="preset-btn" data-filter="warm">sunset glow</button>
+            </div>
+
+            <!-- ENHANCEMENT: Ghibli Coded Title -->
+            <h2>🔮 howl's potions</h2>
+            <div class="filters">
+                <div class="filter-group">
+                    <label>☀️ brightness: <span id="brightnessVal">100</span>%</label>
+                    <input type="range" id="brightness" min="0" max="200" value="100">
+                </div>
+                <div class="filter-group">
+                    <label>🎭 contrast: <span id="contrastVal">100</span>%</label>
+                    <input type="range" id="contrast" min="0" max="200" value="100">
+                </div>
+                <div class="filter-group">
+                    <label>🌈 saturation: <span id="saturationVal">100</span>%</label>
+                    <input type="range" id="saturation" min="0" max="200" value="100">
+                </div>
+                <div class="filter-group">
+                    <label>💫 softness: <span id="blurVal">0</span>px</label>
+                    <input type="range" id="blur" min="0" max="10" value="0">
+                </div>
+            </div>
+        </div>
+
+        <div class="side-panel">
+            <!-- ENHANCEMENT: Ghibli Coded Title -->
+            <h2>🧹 kiki's letters</h2>
+            <div class="gallery" id="gallery"></div>
+        </div>
+    </div>
+
+    <script>
+        let stream = null;
+        let currentFilter = 'none';
+        // Sticker variable removed
+        let collageMode = 'single';
+        let collages = [];
+        let isCapturing = false;
+        let capturedPhotos = [];
+        // Sticker animation frame variable removed
+        
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const overlayCanvas = document.getElementById('overlayCanvas');
+        const collageCanvas = document.getElementById('collageCanvas');
+        const ctx = canvas.getContext('2d');
+        const overlayCtx = overlayCanvas.getContext('2d');
+        const collageCtx = collageCanvas.getContext('2d');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const captureBtn = document.getElementById('captureBtn');
+        const gallery = document.getElementById('gallery');
+        const status = document.getElementById('status');
+        const videoContainer = document.getElementById('videoContainer');
+        
+        const brightness = document.getElementById('brightness');
+        const contrast = document.getElementById('contrast');
+        const saturation = document.getElementById('saturation');
+        const blur = document.getElementById('blur');
+        
+        const presets = {
+            none: { brightness: 100, contrast: 100, saturation: 100, blur: 0, grayscale: 0, sepia: 0 },
+            grayscale: { brightness: 100, contrast: 100, saturation: 0, blur: 0, grayscale: 100, sepia: 0 },
+            sepia: { brightness: 100, contrast: 100, saturation: 100, blur: 0, grayscale: 0, sepia: 100 },
+            vintage: { brightness: 110, contrast: 90, saturation: 80, blur: 1, grayscale: 0, sepia: 30 },
+            cool: { brightness: 105, contrast: 110, saturation: 120, blur: 0, grayscale: 0, sepia: 0 },
+            warm: { brightness: 110, contrast: 100, saturation: 130, blur: 0, grayscale: 0, sepia: 20 }
+        };
+        
+        const collageConfig = {
+            'single': { count: 1, cols: 1, rows: 1 },
+            '2-strip': { count: 2, cols: 1, rows: 2 },
+            '3-strip': { count: 3, cols: 1, rows: 3 },
+            '4-strip': { count: 4, cols: 1, rows: 4 },
+            '2x2': { count: 4, cols: 2, rows: 2 },
+            '2x3': { count: 6, cols: 2, rows: 3 }
+        };
+        
+        // All sticker-related drawing and overlay functions removed
+        
+        async function startCamera() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { width: 1280, height: 720 } 
+                });
+                video.srcObject = stream;
+                
+                video.onloadedmetadata = () => {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    overlayCanvas.width = video.videoWidth;
+                    overlayCanvas.height = video.videoHeight;
+                    
+                    startBtn.disabled = true;
+                    stopBtn.disabled = false;
+                    captureBtn.disabled = false;
+                    status.textContent = '✨ camera is ready! choose a collage mode and start your adventure! 🌟';
+                    
+                    // Sticker related logic removed
+                };
+            } catch (err) {
+                console.error('Error accessing camera:', err);
+                status.textContent = '❌ oops! could not access camera. please grant permission!';
+            }
+        }
+        
+        function stopCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                video.srcObject = null;
+                stream = null;
+                
+                // Sticker animation frame logic removed
+                
+                overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+                
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+                captureBtn.disabled = true;
+                status.textContent = '💤 camera stopped. come back soon, friend!';
+            }
+        }
+        
+        function getFilterString() {
+            const b = brightness.value;
+            const c = contrast.value;
+            const s = saturation.value;
+            const bl = blur.value;
+            
+            let filter = `brightness(${b}%) contrast(${c}%) saturate(${s}%) blur(${bl}px)`;
+            
+            if (currentFilter !== 'none') {
+                const preset = presets[currentFilter];
+                if (preset.grayscale > 0) filter += ` grayscale(${preset.grayscale}%)`;
+                if (preset.sepia > 0) filter += ` sepia(${preset.sepia}%)`;
+            }
+            
+            return filter;
+        }
+        
+        function applyFilters() {
+            video.style.filter = getFilterString();
+        }
+        
+        function showCountdown(num) {
+            return new Promise(resolve => {
+                const countdown = document.createElement('div');
+                countdown.className = 'countdown';
+                countdown.textContent = num;
+                videoContainer.appendChild(countdown);
+                
+                setTimeout(() => {
+                    countdown.remove();
+                    resolve();
+                }, 1000);
+            });
+        }
+        
+        async function capturePhoto() {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            
+            ctx.filter = getFilterString();
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // Sticker drawing logic removed
+            
+            return canvas.toDataURL('image/png');
+        }
+        
+        async function startCollageSession() {
+            if (isCapturing) return;
+            
+            isCapturing = true;
+            capturedPhotos = [];
+            captureBtn.disabled = true;
+            
+            const config = collageConfig[collageMode];
+            const totalPhotos = config.count;
+            
+            for (let i = 0; i < totalPhotos; i++) {
+                status.textContent = `📸 get ready for photo ${i + 1} of ${totalPhotos}...`;
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                await showCountdown('3');
+                await showCountdown('2');
+                await showCountdown('1');
+                await showCountdown('✨');
+                
+                const photo = await capturePhoto();
+                capturedPhotos.push(photo);
+                
+                status.innerHTML = `✨ photo ${i + 1} captured!<div class="progress-bar"><div class="progress-fill" style="width: ${((i + 1) / totalPhotos) * 100}%"></div></div>`;
+                
+                if (i < totalPhotos - 1) {
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                }
+            }
+            
+            status.textContent = '🎨 creating your magical collage...';
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            const collageUrl = await createCollage(capturedPhotos, config);
+            collages.push(collageUrl);
+            updateGallery();
+            
+            createSparkle();
+            status.textContent = `🎉 collage complete! magical memories saved! (${collages.length} total)`;
+            
+            isCapturing = false;
+            captureBtn.disabled = false;
+        }
+        
+        /**
+         * FIX: Rewritten to correctly calculate canvas size based on content,
+         * ensuring photos and frames do not overflow the inner edge.
+         */
+        function createCollage(photos, config) {
+            return new Promise((resolve) => {
+                const photoWidth = 400;
+                const photoHeight = 300;
+                const photoPadding = 15; // padding between photo frames
+                const frameThickness = 8; // white photo frame thickness
+                const frameMargin = 2 * frameThickness; // 16
+
+                // 1. Calculate Content Area (Photos + Frames + Padding)
+                const contentWidth = (photoWidth + frameMargin) * config.cols + photoPadding * (config.cols - 1);
+                const contentHeight = (photoHeight + frameMargin) * config.rows + photoPadding * (config.rows - 1);
+
+                const innerBorder = 10; // Margin between wood/photo background
+                const outerBorder = 40; // Wood frame thickness
+
+                // 2. Calculate final canvas size
+                const collageWidth = contentWidth + 2 * outerBorder;
+                const collageHeight = contentHeight + 2 * outerBorder + 50; // +50 for title bar
+
+                collageCanvas.width = collageWidth;
+                collageCanvas.height = collageHeight;
+                
+                // Ghibli-style background with sky and grass
+                const skyGradient = collageCtx.createLinearGradient(0, 0, 0, collageHeight * 0.6);
+                skyGradient.addColorStop(0, '#87CEEB');
+                skyGradient.addColorStop(0.5, '#B0E0E6');
+                skyGradient.addColorStop(1, '#98D8C8');
+                collageCtx.fillStyle = skyGradient;
+                collageCtx.fillRect(0, 0, collageWidth, collageHeight);
+                
+                // Grass at bottom
+                const grassGradient = collageCtx.createLinearGradient(0, collageHeight * 0.6, 0, collageHeight);
+                grassGradient.addColorStop(0, '#98D8C8');
+                grassGradient.addColorStop(0.5, '#7CB342');
+                grassGradient.addColorStop(1, '#558B2F');
+                collageCtx.fillStyle = grassGradient;
+                collageCtx.fillRect(0, collageHeight * 0.6, collageWidth, collageHeight * 0.4);
+                
+                // Draw fluffy clouds
+                collageCtx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+                [[80, 60, 40], [collageWidth - 100, 80, 35], [collageWidth / 2, 50, 45]].forEach(([x, y, r]) => {
+                    collageCtx.beginPath();
+                    collageCtx.arc(x, y, r, 0, 2 * Math.PI);
+                    collageCtx.arc(x + r, y, r * 0.8, 0, 2 * Math.PI);
+                    collageCtx.arc(x - r * 0.5, y, r * 0.9, 0, 2 * Math.PI);
+                    collageCtx.fill();
+                });
+                
+                // Draw grass details
+                collageCtx.strokeStyle = '#4CAF50';
+                collageCtx.lineWidth = 2;
+                for (let i = 0; i < 20; i++) {
+                    const x = Math.random() * collageWidth;
+                    const y = collageHeight * 0.7 + Math.random() * (collageHeight * 0.3);
+                    collageCtx.beginPath();
+                    collageCtx.moveTo(x, y);
+                    collageCtx.lineTo(x + Math.random() * 10 - 5, y - 15);
+                    collageCtx.stroke();
+                }
+                
+                // Wooden frame border
+                collageCtx.fillStyle = '#8B7355';
+                collageCtx.fillRect(0, 0, collageWidth, collageHeight);
+                
+                // Inner lighter wood
+                collageCtx.fillStyle = '#A0826D';
+                collageCtx.fillRect(innerBorder, innerBorder, collageWidth - 2 * innerBorder, collageHeight - 2 * innerBorder);
+                
+                // Photo background area (paper look)
+                collageCtx.fillStyle = '#FFE4B5';
+                collageCtx.fillRect(outerBorder, outerBorder, 
+                    contentWidth, 
+                    contentHeight + 50); // +50 is the bottom area for title
+                
+                // Load and draw all photos
+                let loadedCount = 0;
+                const images = [];
+                
+                photos.forEach((photoData, index) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        images[index] = img;
+                        loadedCount++;
+                        
+                        if (loadedCount === photos.length) {
+                            images.forEach((img, idx) => {
+                                const col = idx % config.cols;
+                                const row = Math.floor(idx / config.cols);
+                                
+                                // Position of the top-left corner of the white photo frame
+                                const frameX = outerBorder + col * (photoWidth + frameMargin + photoPadding);
+                                const frameY = outerBorder + row * (photoHeight + frameMargin + photoPadding);
+                                
+                                // Position of the actual image
+                                const imageX = frameX + frameThickness;
+                                const imageY = frameY + frameThickness;
+                                
+                                // 1. Draw the white frame
+                                collageCtx.fillStyle = 'white';
+                                collageCtx.fillRect(frameX, frameY, photoWidth + frameMargin, photoHeight + frameMargin);
+                                
+                                // 2. Photo shadow
+                                collageCtx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+                                collageCtx.shadowBlur = 15;
+                                collageCtx.shadowOffsetX = 4;
+                                collageCtx.shadowOffsetY = 4;
+                                
+                                // 3. Draw image inside the white frame
+                                collageCtx.drawImage(img, imageX, imageY, photoWidth, photoHeight);
+                                
+                                collageCtx.shadowColor = 'transparent';
+                            });
+                            
+                            // Title with Ghibli style
+                            collageCtx.font = 'bold 30px "Patrick Hand"';
+                            collageCtx.fillStyle = '#2E7D32';
+                            collageCtx.textAlign = 'center';
+                            collageCtx.strokeStyle = '#FFE4B5';
+                            collageCtx.lineWidth = 4;
+                            const text = '🌿 totoro\'s memories 🌳';
+                            collageCtx.strokeText(text, collageWidth / 2, collageHeight - 15);
+                            collageCtx.fillText(text, collageWidth / 2, collageHeight - 15);
+                            
+                            resolve(collageCanvas.toDataURL('image/png'));
+                        }
+                    };
+                    img.src = photoData;
+                });
+            });
+        }
+        
+        function createSparkle() {
+            const emojis = ['✨', '🌟', '💫', '🌸', '🍃'];
+            for (let i = 0; i < 8; i++) {
+                setTimeout(() => {
+                    const sparkle = document.createElement('div');
+                    sparkle.className = 'sparkle';
+                    sparkle.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                    sparkle.style.left = Math.random() * 100 + '%';
+                    sparkle.style.top = Math.random() * 100 + '%';
+                    document.body.appendChild(sparkle);
+                    setTimeout(() => sparkle.remove(), 3000);
+                }, i * 150);
+            }
+        }
+        
+        function updateGallery() {
+            gallery.innerHTML = '';
+            if (collages.length === 0) {
+                gallery.innerHTML = '<p style="text-align: center; color: #558B2F; padding: 20px;">no memories yet... start your adventure! 🌿</p>';
+                return;
+            }
+            collages.forEach((collage, index) => {
+                const item = document.createElement('div');
+                item.className = 'gallery-item';
+                // Apply a slight rotation to items for a handcrafted look
+                item.style.setProperty('--rotation', index % 2 === 0 ? '-1deg' : '2deg');
+                item.innerHTML = `
+                    <img src="${collage}" alt="Collage ${index + 1}">
+                    <div class="actions">
+                        <button onclick="downloadCollage(${index})">💾 save</button>
+                        <button onclick="deleteCollage(${index})">🗑️ delete</button>
+                    </div>
+                `;
+                gallery.appendChild(item);
+            });
+        }
+        
+        function downloadCollage(index) {
+            const link = document.createElement('a');
+            link.href = collages[index];
+            link.download = `totoro-memories-${Date.now()}.png`;
+            link.click();
+            status.textContent = '💾 memory saved to your device! 🌿';
+        }
+        
+        function deleteCollage(index) {
+            collages.splice(index, 1);
+            updateGallery();
+            status.textContent = `🗑️ memory removed (${collages.length} remaining)`;
+        }
+        
+        document.querySelectorAll('.collage-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.collage-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                collageMode = btn.dataset.mode;
+                const config = collageConfig[collageMode];
+                status.textContent = `📸 ${btn.querySelector('.label').textContent} mode! will capture ${config.count} magical moments! ✨`;
+            });
+        });
+        
+        // Sticker button logic removed
+        
+        document.querySelectorAll('.preset-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilter = btn.dataset.filter;
+                
+                if (currentFilter !== 'none') {
+                    const preset = presets[currentFilter];
+                    brightness.value = preset.brightness;
+                    contrast.value = preset.contrast;
+                    saturation.value = preset.saturation;
+                    blur.value = preset.blur;
+                    
+                    document.getElementById('brightnessVal').textContent = preset.brightness;
+                    document.getElementById('contrastVal').textContent = preset.contrast;
+                    document.getElementById('saturationVal').textContent = preset.saturation;
+                    document.getElementById('blurVal').textContent = preset.blur;
+                }
+                
+                applyFilters();
+            });
+        });
+        
+        brightness.addEventListener('input', (e) => {
+            document.getElementById('brightnessVal').textContent = e.target.value;
+            applyFilters();
+        });
+        
+        contrast.addEventListener('input', (e) => {
+            document.getElementById('contrastVal').textContent = e.target.value;
+            applyFilters();
+        });
+        
+        saturation.addEventListener('input', (e) => {
+            document.getElementById('saturationVal').textContent = e.target.value;
+            applyFilters();
+        });
+        
+        blur.addEventListener('input', (e) => {
+            document.getElementById('blurVal').textContent = e.target.value;
+            applyFilters();
+        });
+        
+        startBtn.addEventListener('click', startCamera);
+        stopBtn.addEventListener('click', stopCamera);
+        captureBtn.addEventListener('click', startCollageSession);
+        
+        window.downloadCollage = downloadCollage;
+        window.deleteCollage = deleteCollage;
+        
+        updateGallery();
+    </script>
+</body>
+</html>
